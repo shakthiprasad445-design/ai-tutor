@@ -1,29 +1,265 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Tutor</title>
-    <style>
-        body { font-family: Arial; background: #f5f5f5; padding: 30px; }
-        .chat { max-width: 600px; margin: auto; }
-        .box { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-        .user { background: #dbeafe; }
-        .tutor { background: #dcfce7; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tutor</title>
+
+<style>
+:root {
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --user: linear-gradient(135deg, #6366f1, #4f46e5);
+    --tutor: #f1f5f9;
+    --text: #0f172a;
+    --muted: #475569;
+    --radius: 16px;
+}
+
+/* Dark mode */
+body.dark {
+    --bg: #0f172a;
+    --card: #020617;
+    --tutor: #020617;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 14px;
+    transition: background 0.3s;
+}
+
+header {
+    max-width: 760px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h2 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.toggle {
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--primary);
+}
+
+/* Controls */
+.controls {
+    max-width: 760px;
+    margin: 12px auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+select, .chip {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: var(--card);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.chip.active {
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+
+/* Chat */
+.chat-box {
+    max-width: 760px;
+    margin: auto;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px;
+    height: 65vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.bubble {
+    padding: 12px 16px;
+    border-radius: 18px;
+    margin: 10px 0;
+    max-width: 80%;
+    line-height: 1.5;
+    animation: fadeUp 0.2s ease;
+    white-space: pre-line;
+}
+
+.user {
+    background: var(--user);
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 6px;
+}
+
+.tutor {
+    background: var(--tutor);
+    margin-right: auto;
+    border-bottom-left-radius: 6px;
+}
+
+/* Typing */
+.typing {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.dots::after {
+    content: "";
+    animation: dots 1.5s infinite steps(3);
+}
+
+@keyframes dots {
+    0% {content:"";}
+    33% {content:".";}
+    66% {content:"..";}
+    100% {content:"...";}
+}
+
+@keyframes fadeUp {
+    from {opacity:0; transform:translateY(6px);}
+    to {opacity:1; transform:none;}
+}
+
+/* Input */
+form {
+    max-width: 760px;
+    margin: 12px auto 0;
+    display: flex;
+    gap: 8px;
+    background: var(--card);
+    padding: 10px;
+    border-radius: 14px;
+}
+
+input {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+button {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+}
+
+.voice {
+    background: #22c55e;
+}
+
+@media (max-width: 600px) {
+    .chat-box { height: 60vh; }
+}
+</style>
 </head>
+
 <body>
-<div class="chat">
-    <form method="post">
-        <input name="question" style="width:80%" placeholder="Ask a question" required>
-        <button type="submit">Ask</button>
-    </form>
 
-    {% if question %}
-        <div class="box user"><b>You:</b> {{ question }}</div>
-    {% endif %}
+<header>
+    <h2>AI Tutor 🎓</h2>
+    <div class="toggle" onclick="toggleDark()">🌙 Dark</div>
+</header>
 
-    {% if reply %}
-        <div class="box tutor"><b>Tutor:</b><br>{{ reply.replace('\n','<br>')|safe }}</div>
+<div class="controls">
+    <select id="classSelect" aria-label="Select class level">
+        <option value="">Class</option>
+        {% for i in range(1,11) %}
+        <option value="Class {{i}}">Class {{i}}</option>
+        {% endfor %}
+    </select>
+
+    <div class="chip" onclick="selectSubject(this)">Maths</div>
+    <div class="chip" onclick="selectSubject(this)">Science</div>
+    <div class="chip" onclick="selectSubject(this)">English</div>
+    <div class="chip" onclick="selectSubject(this)">Social Studies</div>
+</div>
+
+<div class="chat-box" id="chat">
+    {% for role, message in chat %}
+    <div class="bubble {{ role }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+
+    {% if thinking %}
+    <div class="bubble tutor typing">
+        Tutor is thinking<span class="dots"></span>
+    </div>
     {% endif %}
 </div>
+
+<form method="POST" onsubmit="augmentQuestion()">
+    <input id="question" type="text" name="question" placeholder="Ask your question…" required>
+    <button type="button" class="voice" onclick="startVoice()">🎤</button>
+    <button type="submit">Send</button>
+</form>
+
+<script>
+let subject = "";
+function selectSubject(el){
+    document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+    el.classList.add("active");
+    subject = el.innerText;
+}
+
+function augmentQuestion(){
+    const cls = document.getElementById("classSelect").value;
+    const q = document.getElementById("question");
+    let prefix = "";
+    if(cls) prefix += cls + " ";
+    if(subject) prefix += subject + " ";
+    q.value = prefix + ": " + q.value;
+}
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+    localStorage.setItem("dark", document.body.classList.contains("dark"));
+}
+
+if(localStorage.getItem("dark")==="true"){
+    document.body.classList.add("dark");
+}
+
+/* Speech to text */
+function startVoice(){
+    if(!('webkitSpeechRecognition' in window)){
+        alert("Voice input not supported");
+        return;
+    }
+    const rec = new webkitSpeechRecognition();
+    rec.lang = "en-IN";
+    rec.onresult = e => {
+        document.getElementById("question").value += e.results[0][0].transcript;
+    };
+    rec.start();
+}
+</script>
+
 </body>
 </html>
