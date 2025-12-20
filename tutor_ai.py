@@ -1,36 +1,70 @@
+import os
 from google import genai
+from google.genai.errors import ClientError
+from groq import Groq
 
-# 👇 Replace with your real API key
-API_KEY = ""
+# ---------- Clients ----------
+gemini_clients = [
+    genai.Client(api_key=os.getenv("GEMINI_API_KEY_1")),
+    genai.Client(api_key=os.getenv("GEMINI_API_KEY_2")),
+]
 
-client = genai.Client(api_key=API_KEY)
+groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-MODEL_NAME = "gemini-2.5-flash"  # Supported cloud model
+CACHE = {}
+
+def build_prompt(question):
+    return f"""
+Explain step by step in simple language.
+At the end, clearly write:
+Final Answer:
+
+Question: {question}
+"""
+
+def ask_gemini(prompt):
+    for client in gemini_clients:
+        if not client:
+            continue
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            if response and response.text:
+                return response.text.strip()
+        except ClientError:
+            continue
+        except Exception:
+            continue
+    return None
+
+def ask_groq(prompt):
+    try:
+        completion = groq.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return completion.choices[0].message.content.strip()
+    except Exception:
+        return None
 
 def ask_tutor(question):
-    # system instruction includes asking guiding questions and giving the final answer
-    system_instruction = f"""
-You are a kind tutor for children aged 8 to 16.
-Explain step by step.
-Ask guiding questions to help the student think.
-Use simple words.
-Encourage effort.
-At the end, always give the final answer clearly.
-Student question: {question}
-Tutor response:
-"""
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=system_instruction
-    )
-    return response.text
+    if question in CACHE:
+        return CACHE[question]
 
-print("AI Tutor is ready! Type your question or 'quit' to exit.")
+    prompt = build_prompt(question)
 
-while True:
-    user_question = input("\nAsk the tutor: ")
-    if user_question.lower() == "quit":
-        break
-    reply = ask_tutor(user_question)
-    print("\nTutor:\n", reply)
+    # 1️⃣ Try Gemini (rotate keys)
+    answer = ask_gemini(prompt)
+    if answer:
+        CACHE[question] = answer
+        return answer
 
+    # 2️⃣ Fallback to Groq
+    answer = ask_groq(prompt)
+    if answer:
+        CACHE[question] = answer
+        return answer
+
+    return "⏳ The tutor is busy right now. Please try again shortly 😊"
