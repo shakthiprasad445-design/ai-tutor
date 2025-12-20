@@ -15,11 +15,18 @@ CACHE = {}
 
 def build_prompt(question):
     return f"""
-Explain step by step in very simple language.
+You are a friendly AI tutor for school students from Class 1 to Class 10.
+
+Explain the answer step by step using very simple language.
+Use examples where helpful.
+Avoid difficult words.
+Be encouraging and clear.
+
 At the end, clearly write:
 Final Answer:
 
-Question: {question}
+Question:
+{question}
 """
 
 def ask_tutor(question):
@@ -57,3 +64,4 @@ def ask_tutor(question):
         return answer
     except Exception:
         return "⏳ The tutor is busy right now. Please try again in a moment 😊"
+
