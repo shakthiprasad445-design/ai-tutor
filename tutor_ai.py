@@ -27,7 +27,7 @@ Final Answer:
         return r.text.strip()
     except:
         c = groq.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             messages=[{"role":"user","content":prompt}]
         )
         return c.choices[0].message.content.strip()
@@ -58,7 +58,7 @@ Topic:
         return r.text.strip()
     except:
         c = groq.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             messages=[{"role":"user","content":prompt}]
         )
         return c.choices[0].message.content.strip()
@@ -92,7 +92,7 @@ Do not explain.
         return r.text.strip()
     except:
         c = groq.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             messages=[{"role":"user","content":prompt}]
         )
         return c.choices[0].message.content.strip()
@@ -116,7 +116,7 @@ Correct Answer:
         return r.text.strip()
     except:
         c = groq.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             messages=[{"role":"user","content":prompt}]
         )
         return c.choices[0].message.content.strip()
