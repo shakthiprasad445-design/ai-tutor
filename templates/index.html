@@ -7,174 +7,115 @@
 
 <style>
 :root {
-    --primary: #4f46e5;
-    --primary-soft: #eef2ff;
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --user: linear-gradient(135deg, #6366f1, #4f46e5);
-    --tutor: #f1f5f9;
-    --text: #0f172a;
-    --muted: #475569;
-    --radius: 16px;
-}
-
-/* Dark mode */
-body.dark {
-    --bg: #0f172a;
-    --card: #020617;
-    --tutor: #020617;
+    --accent: #22d3ee;
+    --bg: radial-gradient(circle at top, #020617, #000);
+    --glass: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.15);
     --text: #e5e7eb;
-    --muted: #94a3b8;
-}
-
-* {
-    box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    font-family: "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh;
+    font-family: system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
-    padding: 14px;
-    transition: background 0.3s;
+    padding: 16px;
 }
 
 header {
-    max-width: 760px;
+    max-width: 780px;
     margin: auto;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 12px;
 }
 
-h2 {
-    margin: 0;
-    font-weight: 600;
+.orb {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent), transparent 70%);
+    box-shadow: 0 0 20px var(--accent);
+    animation: pulse 2.5s infinite;
 }
 
-.toggle {
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--primary);
+@keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
 }
 
-/* Controls */
 .controls {
-    max-width: 760px;
-    margin: 12px auto;
+    max-width: 780px;
+    margin: 14px auto;
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 select, .chip {
-    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
     border-radius: 999px;
-    border: 1px solid #e5e7eb;
-    background: var(--card);
     cursor: pointer;
-    font-size: 14px;
 }
 
 .chip.active {
-    background: var(--primary);
-    color: white;
-    border: none;
+    color: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
 }
 
-/* Chat */
 .chat-box {
-    max-width: 760px;
-    margin: auto;
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 14px;
+    max-width: 780px;
     height: 65vh;
+    margin: auto;
+    padding: 14px;
+    border-radius: 20px;
+    background: var(--glass);
+    border: 1px solid var(--border);
     overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 .bubble {
-    padding: 12px 16px;
-    border-radius: 18px;
-    margin: 10px 0;
     max-width: 80%;
-    line-height: 1.5;
-    animation: fadeUp 0.2s ease;
-    white-space: pre-line;
+    padding: 14px 18px;
+    margin: 12px 0;
+    border-radius: 18px;
 }
 
 .user {
-    background: var(--user);
-    color: white;
     margin-left: auto;
-    border-bottom-right-radius: 6px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
 }
 
 .tutor {
-    background: var(--tutor);
-    margin-right: auto;
-    border-bottom-left-radius: 6px;
+    background: rgba(255,255,255,0.08);
 }
 
-/* Typing */
-.typing {
-    font-style: italic;
-    opacity: 0.7;
-}
-
-.dots::after {
-    content: "";
-    animation: dots 1.5s infinite steps(3);
-}
-
-@keyframes dots {
-    0% {content:"";}
-    33% {content:".";}
-    66% {content:"..";}
-    100% {content:"...";}
-}
-
-@keyframes fadeUp {
-    from {opacity:0; transform:translateY(6px);}
-    to {opacity:1; transform:none;}
-}
-
-/* Input */
 form {
-    max-width: 760px;
-    margin: 12px auto 0;
+    max-width: 780px;
+    margin: 14px auto 0;
     display: flex;
     gap: 8px;
-    background: var(--card);
-    padding: 10px;
-    border-radius: 14px;
 }
 
 input {
     flex: 1;
-    padding: 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
     font-size: 16px;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
 }
 
 button {
-    padding: 12px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 8px 14px;
     border-radius: 12px;
-    border: none;
-    background: var(--primary);
-    color: white;
-    cursor: pointer;
-}
-
-.voice {
-    background: #22c55e;
-}
-
-@media (max-width: 600px) {
-    .chat-box { height: 60vh; }
 }
 </style>
 </head>
@@ -182,82 +123,51 @@ button {
 <body>
 
 <header>
-    <h2>AI Tutor 🎓</h2>
-    <div class="toggle" onclick="toggleDark()">🌙 Dark</div>
+    <div class="orb"></div>
+    <h2>AI Tutor</h2>
 </header>
 
 <div class="controls">
-    <select id="classSelect" aria-label="Select class level">
-        <option value="">Class</option>
-        {% for i in range(1,11) %}
-        <option value="Class {{i}}">Class {{i}}</option>
-        {% endfor %}
+    <select id="mode" name="mode">
+        <option value="explain">Explain</option>
+        <option value="test">Test Me</option>
+        <option value="revise">Revise</option>
     </select>
 
-    <div class="chip" onclick="selectSubject(this)">Maths</div>
-    <div class="chip" onclick="selectSubject(this)">Science</div>
-    <div class="chip" onclick="selectSubject(this)">English</div>
-    <div class="chip" onclick="selectSubject(this)">Social Studies</div>
+    <div class="chip" onclick="setSubject(this,'#22d3ee')">Maths</div>
+    <div class="chip" onclick="setSubject(this,'#a78bfa')">Science</div>
+    <div class="chip" onclick="setSubject(this,'#34d399')">English</div>
 </div>
 
-<div class="chat-box" id="chat">
-    {% for role, message in chat %}
-    <div class="bubble {{ role }}">
-        {{ message }}
-    </div>
-    {% endfor %}
+<div class="chat-box">
+{% for role, message in chat %}
+<div class="bubble {{ role }}">{{ message }}</div>
+{% endfor %}
 
-    {% if thinking %}
-    <div class="bubble tutor typing">
-        Tutor is thinking<span class="dots"></span>
-    </div>
-    {% endif %}
+{% if thinking %}
+<div class="bubble tutor">Processing<span class="dots"></span></div>
+{% endif %}
 </div>
 
-<form method="POST" onsubmit="augmentQuestion()">
-    <input id="question" type="text" name="question" placeholder="Ask your question…" required>
-    <button type="button" class="voice" onclick="startVoice()">🎤</button>
+<form method="POST" onsubmit="augment()">
+    <input id="q" name="question" placeholder="Ask something…" required>
+    <input type="hidden" id="modeInput" name="mode">
     <button type="submit">Send</button>
 </form>
 
 <script>
 let subject = "";
-function selectSubject(el){
+
+function setSubject(el, color){
     document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
     el.classList.add("active");
     subject = el.innerText;
+    document.documentElement.style.setProperty("--accent", color);
 }
 
-function augmentQuestion(){
-    const cls = document.getElementById("classSelect").value;
-    const q = document.getElementById("question");
-    let prefix = "";
-    if(cls) prefix += cls + " ";
-    if(subject) prefix += subject + " ";
-    q.value = prefix + ": " + q.value;
-}
-
-function toggleDark(){
-    document.body.classList.toggle("dark");
-    localStorage.setItem("dark", document.body.classList.contains("dark"));
-}
-
-if(localStorage.getItem("dark")==="true"){
-    document.body.classList.add("dark");
-}
-
-/* Speech to text */
-function startVoice(){
-    if(!('webkitSpeechRecognition' in window)){
-        alert("Voice input not supported");
-        return;
-    }
-    const rec = new webkitSpeechRecognition();
-    rec.lang = "en-IN";
-    rec.onresult = e => {
-        document.getElementById("question").value += e.results[0][0].transcript;
-    };
-    rec.start();
+function augment(){
+    document.getElementById("modeInput").value =
+        document.getElementById("mode").value;
 }
 </script>
 
