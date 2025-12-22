@@ -1,87 +1,122 @@
 import os
 from google import genai
-from google.genai.errors import ClientError
 from groq import Groq
 
-# Clients
-gemini_clients = [
-    genai.Client(api_key=os.getenv("GEMINI_API_KEY_1")),
-    genai.Client(api_key=os.getenv("GEMINI_API_KEY_2")),
-]
-
+gemini = genai.Client(api_key=os.getenv("GEMINI_API_KEY_1"))
 groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-CACHE = {}
+def ask_explain(question):
+    prompt = f"""
+You are a friendly AI tutor.
 
-def build_prompt(question, mode="explain"):
-    base = "You are a friendly AI tutor for students from Class 1 to Class 10.\n"
-
-    if mode == "test":
-        instruction = """
-Ask 3 questions one by one.
-Wait for the student's answer.
-Give hints if wrong.
-Do NOT reveal the answer immediately.
-"""
-    elif mode == "revise":
-        instruction = """
-Give a short revision with key points.
-Use bullet points.
-Keep it concise.
-"""
-    else:  # explain
-        instruction = """
-Explain step by step in very simple language.
-Use examples.
-Be encouraging.
-"""
-
-    return f"""
-{base}
-{instruction}
-
-At the end, clearly write:
-Final Answer:
+Explain the following in very simple language.
+Use step-by-step explanation.
+Use examples if helpful.
 
 Question:
 {question}
+
+End with:
+Final Answer:
 """
-
-def ask_tutor(question, mode="explain"):
-    if question in CACHE:
-        return CACHE[question]
-
-    prompt = build_prompt(question, mode)
-
-    # 1️⃣ Try Gemini (rotate keys)
-    for client in gemini_clients:
-        if not client:
-            continue
-        try:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
-            )
-            if response and response.text:
-                answer = response.text.strip()
-                CACHE[question] = answer
-                return answer
-        except ClientError:
-            continue
-        except Exception:
-            continue
-
-    # 2️⃣ Fallback to Groq
     try:
-        completion = groq.chat.completions.create(
-            model="llama3-8b-8192",
-            messages=[{"role": "user", "content": prompt}]
+        r = gemini.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
         )
-        answer = completion.choices[0].message.content.strip()
-        CACHE[question] = answer
-        return answer
-    except Exception:
-        return "⏳ The tutor is busy right now. Please try again in a moment 😊"
+        return r.text.strip()
+    except:
+        c = groq.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role":"user","content":prompt}]
+        )
+        return c.choices[0].message.content.strip()
 
 
+def generate_test_question(topic):
+    prompt = f"""
+You are a school teacher.
 
+Create ONE clear question on the topic below.
+Also provide the correct answer separately.
+
+Format exactly like this:
+QUESTION:
+<question>
+
+ANSWER:
+<answer>
+
+Topic:
+{topic}
+"""
+    try:
+        r = gemini.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        return r.text.strip()
+    except:
+        c = groq.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role":"user","content":prompt}]
+        )
+        return c.choices[0].message.content.strip()
+
+
+def check_answer(student_answer, correct_answer):
+    prompt = f"""
+A student answered a question.
+
+Correct Answer:
+{correct_answer}
+
+Student Answer:
+{student_answer}
+
+If the student's answer is correct or mostly correct:
+Reply exactly:
+CORRECT
+
+If wrong:
+Reply exactly:
+WRONG
+
+Do not explain.
+"""
+    try:
+        r = gemini.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        return r.text.strip()
+    except:
+        c = groq.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role":"user","content":prompt}]
+        )
+        return c.choices[0].message.content.strip()
+
+
+def explain_correct_answer(question, correct_answer):
+    prompt = f"""
+Explain the correct answer in simple language.
+
+Question:
+{question}
+
+Correct Answer:
+{correct_answer}
+"""
+    try:
+        r = gemini.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        return r.text.strip()
+    except:
+        c = groq.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role":"user","content":prompt}]
+        )
+        return c.choices[0].message.content.strip()
