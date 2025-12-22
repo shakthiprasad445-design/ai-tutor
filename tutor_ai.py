@@ -13,14 +13,32 @@ groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 CACHE = {}
 
-def build_prompt(question):
-    return f"""
-You are a friendly AI tutor for school students from Class 1 to Class 10.
+def build_prompt(question, mode="explain"):
+    base = "You are a friendly AI tutor for students from Class 1 to Class 10.\n"
 
-Explain the answer step by step using very simple language.
-Use examples where helpful.
-Avoid difficult words.
-Be encouraging and clear.
+    if mode == "test":
+        instruction = """
+Ask 3 questions one by one.
+Wait for the student's answer.
+Give hints if wrong.
+Do NOT reveal the answer immediately.
+"""
+    elif mode == "revise":
+        instruction = """
+Give a short revision with key points.
+Use bullet points.
+Keep it concise.
+"""
+    else:  # explain
+        instruction = """
+Explain step by step in very simple language.
+Use examples.
+Be encouraging.
+"""
+
+    return f"""
+{base}
+{instruction}
 
 At the end, clearly write:
 Final Answer:
@@ -64,4 +82,5 @@ def ask_tutor(question):
         return answer
     except Exception:
         return "⏳ The tutor is busy right now. Please try again in a moment 😊"
+
 
