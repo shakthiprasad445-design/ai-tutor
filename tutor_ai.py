@@ -47,11 +47,11 @@ Question:
 {question}
 """
 
-def ask_tutor(question):
+def ask_tutor(question, mode="explain"):
     if question in CACHE:
         return CACHE[question]
 
-    prompt = build_prompt(question)
+    prompt = build_prompt(question, mode)
 
     # 1️⃣ Try Gemini (rotate keys)
     for client in gemini_clients:
@@ -82,5 +82,6 @@ def ask_tutor(question):
         return answer
     except Exception:
         return "⏳ The tutor is busy right now. Please try again in a moment 😊"
+
 
 
